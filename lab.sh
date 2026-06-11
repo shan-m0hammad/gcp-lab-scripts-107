@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 # Define color variables
@@ -17,16 +16,17 @@ RESET_FORMAT=$'\033[0m'
 # Define text formatting variables
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
-
+BOLD=`tput bold`
+RESET=`tput sgr0`
 clear
+
 
 # Welcome message
 echo "${GREEN_TEXT}${BOLD_TEXT}======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}             INITIATING EXECUTION...                 ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}                    SHAN MOHAMMAD                     ${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}======================================================${RESET_FORMAT}"
 echo
+
 
 gcloud auth list
 
@@ -34,23 +34,23 @@ export PROJECT_ID=$DEVSHELL_PROJECT_ID
 
 cat > inspect-request.json <<EOF_CP
 {
-  "item": {
-    "value": "My phone number is (206) 555-0123."
+  "item":{
+    "value":"My phone number is (206) 555-0123."
   },
-  "inspectConfig": {
-    "infoTypes": [
+  "inspectConfig":{
+    "infoTypes":[
       {
-        "name": "PHONE_NUMBER"
+        "name":"PHONE_NUMBER"
       },
       {
-        "name": "US_TOLLFREE_PHONE_NUMBER"
+        "name":"US_TOLLFREE_PHONE_NUMBER"
       }
     ],
-    "minLikelihood": "POSSIBLE",
-    "limits": {
-      "maxFindingsPerItem": 0
+    "minLikelihood":"POSSIBLE",
+    "limits":{
+      "maxFindingsPerItem":0
     },
-    "includeQuote": true
+    "includeQuote":true
   }
 }
 EOF_CP
@@ -61,54 +61,56 @@ curl -s \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   https://dlp.googleapis.com/v2/projects/$PROJECT_ID/content:inspect \
-  -d @inspect-request.json \
-  -o inspect-output.txt
+  -d @inspect-request.json -o inspect-output.txt
+
 
 cat inspect-output.txt
 
 gsutil cp inspect-output.txt gs://$PROJECT_ID-bucket
 
+
+
 cat > new-inspect-file.json <<EOF_CP
 {
   "item": {
-    "value": "My email is test@gmail.com"
-  },
-  "deidentifyConfig": {
-    "infoTypeTransformations": {
-      "transformations": [
-        {
-          "primitiveTransformation": {
-            "replaceWithInfoTypeConfig": {}
-          }
+     "value":"My email is test@gmail.com",
+   },
+   "deidentifyConfig": {
+     "infoTypeTransformations":{
+          "transformations": [
+            {
+              "primitiveTransformation": {
+                "replaceWithInfoTypeConfig": {}
+              }
+            }
+          ]
         }
-      ]
-    }
-  },
-  "inspectConfig": {
-    "infoTypes": [
-      {
+    },
+    "inspectConfig": {
+      "infoTypes": {
         "name": "EMAIL_ADDRESS"
       }
-    ]
-  }
+    }
 }
 EOF_CP
+
 
 curl -s \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
   https://dlp.googleapis.com/v2/projects/$PROJECT_ID/content:deidentify \
-  -d @new-inspect-file.json \
-  -o redact-output.txt
+  -d @new-inspect-file.json -o redact-output.txt
 
 cat redact-output.txt
 
 gsutil cp redact-output.txt gs://$PROJECT_ID-bucket
 
 # Final message
+
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+
 echo
-```
+echo
